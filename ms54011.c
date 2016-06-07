@@ -7,7 +7,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define F_CPU 16000000UL
+#define F_CPU 8000000UL
 
 #include <util/delay.h>
 
@@ -21,7 +21,7 @@ ISR(INT0_vect){
 ISR(INT2_vect){
 	countInt1++;	
 }
-ISR (TIMER1_OVF_vect){
+ISR(TIMER1_OVF_vect){
 	PORTB ^= (1<<PB0);
 }
 //--Main-Functions---------------------------------------------------------------------//
@@ -34,12 +34,11 @@ void setupInterrupt(void){
 	sei();
 }
 void setupTimer1(void){
-	TCCR1B = (1<<CS12);			//1048.576 mS (F_CPU/256)
-	TCNT1 = 65536-62439;		//1s
-//--Enable timer 1 overflow interrupt-----------------------------------------------//
-	TIMSK = (1<<TOIE1);
+	TCCR1B = (1<<CS12);			//2048 mS (F_CPU/256)
+	TCNT1 = 32768;			//1024 mS
+	TIMSK = (1<<TOIE1);			//Enable timer 1 overflow interrupt
+	sei();
 }
-
 void setupPorts(void){
 	SFIOR |= ~(1<<PUD); //Pull-up enabled
 //---------Port A Initialization----------------------------------------------------//
@@ -87,6 +86,7 @@ void start(void){
 //---------------------------------------------------------------------------------//
 void setGTS(void){
 	if ( PORTB & (1<<PB7)){
+//------------------------G1--------------------G2--------------------G3--------------------G4---//
 		if ( (PORTB & (1<<PB1)) || (PORTB & (1<<PB4)) || (PORTB & (1<<PB5)) || (PORTB & (1<<PB6)) )
 			PORTD |= (1<<PD3);
 	}
