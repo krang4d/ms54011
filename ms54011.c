@@ -23,6 +23,9 @@ ISR(INT2_vect){
 	PORTB ^= (1<<PB0);	
 }
 ISR(TIMER1_OVF_vect){
+	//TCNT1H = 0;
+	//TCNT1L = 0;
+	TCNT1 = 57723;
 	PORTB ^= (1<<PB0);
 }
 //--Main-Functions---------------------------------------------------------------------//
@@ -38,21 +41,21 @@ void setupInterrupt(void){
 }
 void setupTimer1(void){
 	cli();
-	TCCR1B = (1<<CS12) | (1<<CS10);	//2048 mS (F_CPU/1028)
-	TCNT1 = 32768;				//1024 mS
-	TIMSK = (1<<TOIE1);			//Enable timer 1 overflow interrupt
+	TCCR1B = (1<<CS12) | (1<<CS10);	//128 mkS (F_CPU/1028)
+	TIMSK |= (1<<TOIE1);		//Enable timer 1 overflow interrupt
+	TCNT1 = 57723;	
 	sei();
 }
 void setupPorts(void){
 	cli();
-	SFIOR |= ~(1<<PUD); //Pull-up enabled
+	SFIOR &= ~(1<<PUD); //Pull-up enabled
 //---------Port A Initialization----------------------------------------------------//
 	DDRA = 0x00;    //to read,
 	PORTA = 0xFF;	//pull-up resistor
 	
 //---------Port B Initialization----------------------------------------------------//	
 	DDRB = (1<<PB0); //PB0-TESTER
-	PORTB = ~(1<<PB0);	 //pull-up resistor
+	PORTB = ~(1<<PB0);
 	
 //---------Port C Initialization----------------------------------------------------//	
 	DDRC = (1<<PC2);
@@ -104,7 +107,7 @@ void setDTO(void){
 	if ( (countInt0 > 0) && (countInt1 > 0)){
 		PORTC |= (1<<PC2); //to-PC
 		PORTE |= (1<<PE1); //to-BSP
-		_delay_ms(1000);
+		_delay_ms(10);
 		PORTC &= ~(1<<PC2);
 		PORTE &= ~(1<<PE1);
 		//_delay_ms(1000);
